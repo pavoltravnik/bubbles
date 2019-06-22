@@ -43,32 +43,52 @@ const argv = require('yargs').argv;
             console.log(`Exporting ids to blocked/export/${credentials.username}.json was successfull.`);
             await fs.writeFile(`./blocked/export/${credentials.username}.json`, JSON.stringify(values),  'utf8');
 
-        } else if (argv.i || argv.import) {
+        }
+
+         if (argv.i || argv.import) {
             console.log('Uploading blocked ids...');
             const listDir = await fs.readdir('./blocked/import/');
             const files = await listDir.filter(fileName => /.*\.json$/.test(fileName));
+
+            let blocked = [];
+            try {
+                const importBlocked = await fs.readFile(`./blocked/export/${credentials.username}.json`, 'utf8');
+                blocked = await JSON.parse(importBlocked);
+            } catch {
+                blocked = [];
+            }
+
             for (let file of files){
-                let ids = await fs.readFile(`./blocked/import/${file}`, 'utf8');
-                ids = await JSON.parse(ids);
+                const importing = await fs.readFile(`./blocked/import/${file}`, 'utf8');
+                const ids = await JSON.parse(importing);
+
                 for (let id of ids){
-                    await page.goto(`https://www.facebook.com/${id}`, {waitUntil: 'networkidle2'});
+                    if (blocked.includes(id)) {
+                        console.log(`! User ${id} is already blocked.`);
+                    } else {
+                        try {
+                            await page.goto(`https://www.facebook.com/${id}`, {waitUntil: 'networkidle2'});
+                            await page.waitForXPath('//button[@aria-label="Other actions"]/i');
+                            let [linkHandlers] = await page.$x('//button[@aria-label="Other actions"]/i');
+                            await linkHandlers.click();
 
-                    await page.waitForXPath('//button[@aria-label="Other actions"]/i');
-                    let [linkHandlers] = await page.$x('//button[@aria-label="Other actions"]/i');
-                    await linkHandlers.click();
+                            await page.waitForXPath('//span[contains(text(), "Block")]');
+                            [linkHandlers] = await page.$x("//span[contains(text(), 'Block')]");
+                            await linkHandlers.click();
 
-                    await page.waitForXPath('//span[contains(text(), "Block")]');
-                    [linkHandlers] = await page.$x("//span[contains(text(), 'Block')]");
-                    await linkHandlers.click();
+                            await page.waitForXPath('//button[contains(text(), "Confirm")]');
+                            [linkHandlers] = await page.$x('//button[contains(text(), "Confirm")]');
+                            await linkHandlers.click();
 
-                    await page.waitForXPath('//button[contains(text(), "Confirm")]');
-                    [linkHandlers] = await page.$x('//button[contains(text(), "Confirm")]');
-                    await linkHandlers.click();
+                            await page.waitForXPath('//a[contains(text(), "Okay")]');
+                            [linkHandlers] = await page.$x('//a[contains(text(), "Okay")]');
+                            await linkHandlers.click();
 
-                    await page.waitForXPath('//a[contains(text(), "Okay")]');
-                    [linkHandlers] = await page.$x('//a[contains(text(), "Okay")]');
-                    await linkHandlers.click();
-
+                            console.log(`+ User ${id} was blocked.`);
+                        } catch {
+                            console.log(`! User ${id} is probably already blocked.`);
+                        }
+                    }
                 }
             }
 
