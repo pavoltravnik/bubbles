@@ -1,5 +1,6 @@
 # Create your own Bubble
 
+Many people use adblockers to avoid banner advertisement and spam filters. But what about filters on social networks? Let's clean the space and enjoy your comfortable social bubble.
 This is tool how to extract blocked persons on facebook.com.
 If you include some json file from your friend, you can automatically block his blocked/blacklisted profiles.
 **Happy blacklisting!**
