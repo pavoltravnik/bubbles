@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "login": "node --no-warnings ./index.js -l -e",
     "start": "node --no-warnings ./index.js -i -e",
     "import": "node --no-warnings ./index.js -i",
     "export": "node --no-warnings ./index.js -e",
