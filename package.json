@@ -1,6 +1,6 @@
 {
   "name": "bubbles",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -20,8 +20,7 @@
   },
   "homepage": "https://github.com/pavoltravnik/bubbles#readme",
   "dependencies": {
-    "prompts": "^2.1.0",
-    "puppeteer": "^1.18.0",
+    "puppeteer": "^2.0.0",
     "yargs": "^13.2.4"
   }
 }
