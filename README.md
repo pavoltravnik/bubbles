@@ -10,20 +10,23 @@ Install dependencies:
 
 `npm i`
 
+Run bubbles and login:
 
-Run bubbles:
+`npm login`
+
+This will open browser and allow you to login to Facebook. If asked,
+save the browser, otherwise you would need to login everytime you run
+it. The login credentials are saved to loginData folder, keep it safe.
+
+It will also automatically export the list of blocked people.
+
+Run bubbles to import blocklist:
 
 `npm start`
 
-
-Turn off your 2FA authentication. Do not forget to turn it back when you are finished with blocking! 2FA will be implemented soon.
-
 Be sure, you have files in right order and right directory:
-- "blocked/export/" will be filled by json with your blocked profiles on fb named by your email.json (f.e. pavol.travnik@protonmail.com.json)
+- "blocked/export/myexport.json" will be filled by json with your blocked profiles on
+  fb
 - "blocked/import/" folder can contain jsons of your friends (ask them) with list of profiles and they will be automatically be blocked in your profile when you run this app.
-
-If you want to just extract your profile of blacklisted people simply run:
-
-`npm run export`
 
 Blocking of pages coming soon.
