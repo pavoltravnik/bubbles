@@ -1,32 +1,25 @@
-const prompts = require('prompts');
 const puppeteer = require('puppeteer');
 const fs = require('fs').promises;
 const argv = require('yargs').argv;
 
 (async () => {
-    try {
-        console.log('Please, turn of 2FA before signing in, this feature is not implemented yet. Happy blocking!')
-        const credentials = await prompts([
-            {
-                type: 'text',
-                name: 'username',
-                message: 'Username: ',
-            },
-            {
-                type: 'password',
-                name: 'password',
-                message: 'Password: ',
-            },
-        ]);
+  const browser = await puppeteer.launch({
+    headless: (!argv.l && !argv.login),
+    userDataDir: "loginData"
+  });
+  const page = await browser.newPage();
 
-        console.log('Opening a browser...')
-        const browser = await puppeteer.launch({headless: true});
-        const page = await browser.newPage();
-        await  page.setViewport({width: 1280, height:720});
+  try {
+
+      console.log('Opening a browser...')
+        await page.setViewport({width: 1280, height:720});
         await page.goto('https://www.facebook.com/', {waitUntil: 'networkidle2'});
-        await page.type('#email', credentials.username);
-        await page.type('#pass', credentials.password);
-        await page.click('input[type="submit"]');
+
+        if (argv.l || argv.login) {
+          // wait for homepage to load after a manual login
+          console.log('Attempting login in browser')
+          await page.waitFor('div[aria-label="Create a post"]', {"timeout": 180000});
+        }
 
         if (argv.e || argv.export){
             console.log('Downloading blocked ids...');
@@ -40,8 +33,8 @@ const argv = require('yargs').argv;
                 values.push(propertyValue)
             }
             console.log('Number of blocked persons: ', values.length);
-            console.log(`Exporting ids to blocked/export/${credentials.username}.json was successfull.`);
-            await fs.writeFile(`./blocked/export/${credentials.username}.json`, JSON.stringify(values),  'utf8');
+            console.log(`Exporting ids to blocked/export/myexport.json was successfull.`);
+            await fs.writeFile(`./blocked/export/myexport.json`, JSON.stringify(values),  'utf8');
 
         }
 
@@ -52,7 +45,7 @@ const argv = require('yargs').argv;
 
             let blocked = [];
             try {
-                const importBlocked = await fs.readFile(`./blocked/export/${credentials.username}.json`, 'utf8');
+                const importBlocked = await fs.readFile(`./blocked/export/myexport.json`, 'utf8');
                 blocked = await JSON.parse(importBlocked);
             } catch {
                 blocked = [];
@@ -72,17 +65,25 @@ const argv = require('yargs').argv;
                             let [linkHandlers] = await page.$x('//button[@aria-label="Other actions"]/i');
                             await linkHandlers.click();
 
+                            await page.waitFor(5000)
+
                             await page.waitForXPath('//span[contains(text(), "Block")]');
                             [linkHandlers] = await page.$x("//span[contains(text(), 'Block')]");
                             await linkHandlers.click();
+
+                            await page.waitFor(5000)
 
                             await page.waitForXPath('//button[contains(text(), "Confirm")]');
                             [linkHandlers] = await page.$x('//button[contains(text(), "Confirm")]');
                             await linkHandlers.click();
 
+                            await page.waitFor(5000)
+
                             await page.waitForXPath('//a[contains(text(), "Okay")]');
                             [linkHandlers] = await page.$x('//a[contains(text(), "Okay")]');
                             await linkHandlers.click();
+
+                            await page.waitFor(5000)
 
                             console.log(`+ User ${id} was blocked.`);
                         } catch {
@@ -97,8 +98,9 @@ const argv = require('yargs').argv;
         console.log('Finished successfully.')
 
     } catch (err) {
-        await browser.close();
-        console.error(err);
+      console.error(err);
+      await page.close();
+      await browser.close();
 
   }
   })();
