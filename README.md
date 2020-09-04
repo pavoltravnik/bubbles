@@ -12,7 +12,7 @@ Install dependencies:
 
 Run bubbles and login:
 
-`npm login`
+`npm run login`
 
 This will open browser and allow you to login to Facebook. If asked,
 save the browser, otherwise you would need to login everytime you run
@@ -22,7 +22,7 @@ It will also automatically export the list of blocked people.
 
 Run bubbles to import blocklist:
 
-`npm start`
+`npm run start`
 
 Be sure, you have files in right order and right directory:
 - "blocked/export/myexport.json" will be filled by json with your blocked profiles on
